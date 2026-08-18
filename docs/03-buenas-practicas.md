@@ -17,6 +17,31 @@ Un test escrito con `get_by_test_id` **no detecta ese tipo de problema** — el 
 
 En el login del sistema, por ejemplo, el campo de contraseña y el de correo tienen labels correctamente asociados, así que se usa `get_by_label`. El botón "Iniciar Sesión" tiene texto visible, así que se usa `get_by_role`. Ninguno de los dos necesita `data-testid` — ese atributo queda disponible en el HTML como respaldo, pero no hace falta usarlo ahí.
 
+## Casos especiales: cuando ni `getByLabel` ni `getByRole` alcanzan
+
+El módulo de Inventory tiene dos situaciones donde ninguna de las opciones "normales" de la jerarquía funciona, y se resuelven con `data-testid` puesto a propósito:
+
+### Selects mejorados con TomSelect
+
+Casi todos los `<select>` del sistema (Categoría, Marca, Almacén, Estado, etc.) se mejoran en pantalla con una librería llamada TomSelect — la que convierte un select nativo en un combo con buscador. El problema para testing: TomSelect **oculta el `<select>` original** y lo reemplaza por su propio HTML. Aunque el campo tenga un `<label for="...">` bien puesto, `get_by_label(...)` no puede interactuar con el control real, porque el elemento que ve y clickea un usuario ya no es ese `<select>`.
+
+Para estos campos, usá `get_by_test_id(...)` para abrir el combo, y después seleccioná la opción por su texto visible:
+
+```python
+page.get_by_test_id("product-category").click()
+page.get_by_text("BEBIDAS").click()
+```
+
+Cada campo con TomSelect en el sistema ya tiene su `data-testid` puesto (ej. `product-category`, `product-brand`, `warehouse-branch`, `note-income-warehouse`, `kardex-product`, los filtros `*-status-filter` de cada listado, etc.) — inspeccioná el elemento en el navegador si no estás seguro del nombre exacto.
+
+### Inputs generados por SweetAlert2 (ventanas de confirmación)
+
+Algunas acciones (ej. "Dar de baja" en Productos por Vencer) abren un cuadro de diálogo con un input adentro, generado por una librería de alertas (SweetAlert2) en vez de ser parte del formulario normal de la página. Ahí tampoco hay `<label>` posible. Se resuelve igual, con `data-testid`:
+
+```python
+page.get_by_test_id("baja-cantidad-input").fill("5")
+```
+
 ## Page Object Model: no repitas selectores en cada test
 
 En vez de escribir `page.get_by_label(...)` suelto dentro de cada test, se agrupan los selectores de cada pantalla en una clase, dentro de `pages/`. Ejemplo real del proyecto, `pages/login_page.py`:
