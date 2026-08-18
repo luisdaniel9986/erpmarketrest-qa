@@ -31,7 +31,7 @@ No uses credenciales reales de clientes ni datos de producción. Si no tenés un
 
 ## Tu primer test: login
 
-El proyecto ya trae `pages/login_page.py`, una clase que encapsula los selectores de la pantalla de login (ver `03-buenas-practicas.md` para el porqué de este patrón). El test en sí queda corto — `tests/test_login.py`:
+El proyecto ya trae `pages/login_page.py`, una clase que encapsula los selectores de la pantalla de login (ver `03-patron-de-diseno.md` para el porqué de este patrón). El test en sí queda corto — `tests/test_login.py`:
 
 ```python
 import re
@@ -64,7 +64,7 @@ def test_login_credenciales_invalidas(page: Page, credenciales):
 - `LoginPage` usa `get_by_label(...)` para los campos y `get_by_role("button", name=...)` para el botón — así es como un usuario real (o un lector de pantalla) identifica cada elemento, no dependemos de detalles internos de HTML.
 - `expect(page).to_have_url(...)` confirma que, tras el login, el sistema redirigió a donde correspondía — esa es la señal real de éxito o fallo.
 
-Para más detalle sobre por qué se eligen estos selectores en particular, ver `03-buenas-practicas.md`.
+Para más detalle sobre por qué se eligen estos selectores en particular, ver `04-buenas-practicas.md`.
 
 ## Correr el test
 
@@ -122,4 +122,4 @@ Navegá el flujo que querés probar (crear un comprobante, buscar un producto, e
 2. Movés los selectores a una clase nueva en `pages/` (ej. `pages/facturacion_page.py`), siguiendo el mismo patrón que `pages/login_page.py`.
 3. El test que llama a esa clase va en `tests/` (ej. `tests/test_facturacion.py`).
 
-Ver `03-buenas-practicas.md` para el criterio completo de organización — importante si van a trabajar dos personas sobre el mismo repo.
+Ver `04-buenas-practicas.md` para el criterio completo de organización — importante si van a trabajar dos personas sobre el mismo repo.

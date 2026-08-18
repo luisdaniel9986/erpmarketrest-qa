@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Buenas prácticas de reporte
-    url: https://github.com/luisdaniel9986/erpmarketrest-qa/blob/main/docs/03-buenas-practicas.md
+    url: https://github.com/luisdaniel9986/erpmarketrest-qa/blob/main/docs/04-buenas-practicas.md
     about: Antes de reportar, revisá cómo se documenta un bug en este equipo.

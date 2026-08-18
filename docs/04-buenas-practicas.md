@@ -44,36 +44,7 @@ page.get_by_test_id("baja-cantidad-input").fill("5")
 
 ## Page Object Model: no repitas selectores en cada test
 
-En vez de escribir `page.get_by_label(...)` suelto dentro de cada test, se agrupan los selectores de cada pantalla en una clase, dentro de `pages/`. Ejemplo real del proyecto, `pages/login_page.py`:
-
-```python
-class LoginPage:
-    def __init__(self, page):
-        self.page = page
-
-    def ir_a_login(self):
-        self.page.goto("/login")
-
-    def login(self, email, password):
-        self.page.get_by_label("Correo Electrónico").fill(email)
-        self.page.get_by_label("Contraseña").fill(password)
-        self.page.get_by_role("button", name="Iniciar Sesión").click()
-
-    def mensaje_error(self):
-        return self.page.locator(".alert-danger")
-```
-
-Y el test, en `tests/`, queda corto y se lee como una historia:
-
-```python
-def test_login_exitoso(page, credenciales):
-    login_page = LoginPage(page)
-    login_page.ir_a_login()
-    login_page.login(credenciales["email"], credenciales["password"])
-    expect(page).to_have_url(re.compile(r"/dashboard"))
-```
-
-Ventaja concreta: si mañana el botón "Iniciar Sesión" cambia de texto, arreglás una sola línea en `LoginPage`, no cada test que lo usa. Para un flujo nuevo, creá `pages/<flujo>_page.py` siguiendo este mismo patrón.
+Este proyecto agrupa los selectores de cada pantalla en una clase dentro de `pages/`, y los tests solo orquestan esas clases — nunca tienen un selector suelto. Es el patrón de arquitectura del repo, cubierto en detalle (con ejemplos completos de `LoginPage` y `CategoriaPage`) en `03-patron-de-diseno.md`. Léelo antes de seguir si todavía no sabés por qué `pages/` y `tests/` están separados así.
 
 ## Credenciales: nunca hardcodeadas
 
@@ -108,7 +79,7 @@ Al abrir un issue nuevo en GitHub vas a ver el template ya armado (`.github/ISSU
 5. **Evidencia**: el trace de Playwright si el fallo salió de un test automatizado (ver `02-guia-testing.md` para generarlo con `--tracing on`), o una captura/video si fue manual.
 6. **Test relacionado**, si existe uno que lo detectó.
 
-Ver `05-ejemplo-issue.md` para un ejemplo ya completado, con explicación de por qué está bien escrito.
+Ver `06-ejemplo-issue.md` para un ejemplo ya completado, con explicación de por qué está bien escrito.
 
 ## Organización de los tests
 
