@@ -1,12 +1,90 @@
+import re
+
+
 class CategoriaPage:
     def __init__(self, page):
         self.page = page
 
     def ir_a_categorias(self):
-        self.page.goto("/inventario/categorias/index")
+        self.page.get_by_role("button", name=re.compile("Inventario")).click()
+        self.page.get_by_role("link", name="Categorías").click()
+
+    def importar_categorias(self, ruta_archivo):
+        self.page.get_by_role("button", name=re.compile("IMPORTAR")).click()
+
+        with self.page.expect_download():
+            self.page.get_by_role(
+                "link", name=re.compile("Descargar formato Excel")
+            ).click()
+
+        self.page.get_by_role(
+            "button", name=re.compile("Archivo Excel")
+        ).set_input_files(ruta_archivo)
+        self.page.get_by_role("button", name=re.compile("Validar")).click()
+        self.page.get_by_role(
+            "button", name=re.compile(r"Importar 1 categor.as")
+        ).click()
+        self.page.get_by_role("button", name=re.compile("Cerrar")).click()
+
+    def cancelar_importacion(self):
+        self.page.get_by_role("button", name=re.compile("IMPORTAR")).click()
+        self.page.get_by_role("button", name=re.compile("Cancelar")).click()
 
     def crear_categoria(self, nombre):
-        self.page.get_by_role("button", name=" NUEVO").click()
-        self.page.get_by_role("textbox", name="Nombre de la categoría").fill(nombre)
-        self.page.get_by_role("button", name=" Guardar").click()
+        self.page.get_by_role("button", name=re.compile("NUEVO")).click()
+        self.page.get_by_role("textbox", name="Nombre *").fill(nombre)
+        self.page.get_by_role("button", name=re.compile("Guardar")).click()
         self.page.get_by_role("button", name="Sí").click()
+
+    def cancelar_creacion(self):
+        self.page.get_by_role("button", name=re.compile("NUEVO")).click()
+        self.page.get_by_role("button", name=re.compile("Cancelar")).click()
+
+    def filtrar_por_estado(self, estado):
+        self.page.locator("div").filter(has_text=re.compile("^Solo activos$")).first.click()
+        self.page.get_by_role("option", name=estado, exact=True).click()
+        self.page.get_by_role("button", name=re.compile("Filtrar")).click()
+
+    def limpiar_filtro(self):
+        self.page.get_by_role("button", name=re.compile("Limpiar")).click()
+
+    def editar_categoria(self, nombre):
+        fila = self._fila_de_categoria(nombre)
+        fila.get_by_test_id(re.compile("row-actions-")).click()
+        fila.get_by_test_id(re.compile("btn-edit-")).click()
+        self.page.get_by_role("button", name=re.compile("Guardar")).click()
+        self.page.get_by_role("button", name="Sí").click()
+
+    def cancelar_eliminacion(self, nombre):
+        self._abrir_eliminacion(nombre)
+        self.page.get_by_role("button", name="Cancelar").click()
+
+    def eliminar_categoria(self, nombre):
+        self._abrir_eliminacion(nombre)
+        self.page.get_by_role("button", name="Sí, eliminar").click()
+
+    def reactivar_categoria(self, nombre):
+        fila = self._fila_de_categoria(nombre)
+        fila.get_by_test_id(re.compile("row-actions-")).click()
+        fila.get_by_test_id(re.compile("btn-activate-")).click()
+        self.page.get_by_role("button", name="Sí, activar").click()
+
+    def categoria(self, nombre):
+        return self.page.get_by_text(nombre, exact=True)
+
+    def boton_importar(self):
+        return self.page.get_by_role("button", name=re.compile("IMPORTAR"))
+
+    def boton_nuevo(self):
+        return self.page.get_by_role("button", name=re.compile("NUEVO"))
+
+    def alerta_de_confirmacion(self):
+        return self.page.locator(".swal2-container")
+
+    def _fila_de_categoria(self, nombre):
+        return self.page.locator("tr").filter(has_text=nombre)
+
+    def _abrir_eliminacion(self, nombre):
+        fila = self._fila_de_categoria(nombre)
+        fila.get_by_test_id(re.compile("row-actions-")).click()
+        fila.get_by_test_id(re.compile("btn-delete-")).click()
