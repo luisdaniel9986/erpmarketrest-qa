@@ -30,6 +30,10 @@ class CategoriaPage:
         self.page.get_by_role("button", name=re.compile("IMPORTAR")).click()
         self.page.get_by_role("button", name=re.compile("Cancelar")).click()
 
+    def cerrar_importacion(self):
+        self.page.get_by_role("button", name=re.compile("IMPORTAR")).click()
+        self._cerrar_modal_con_x()
+
     def crear_categoria(self, nombre):
         self.page.get_by_role("button", name=re.compile("NUEVO")).click()
         self.page.get_by_role("textbox", name="Nombre *").fill(nombre)
@@ -40,20 +44,33 @@ class CategoriaPage:
         self.page.get_by_role("button", name=re.compile("NUEVO")).click()
         self.page.get_by_role("button", name=re.compile("Cancelar")).click()
 
+    def cerrar_creacion(self):
+        self.page.get_by_role("button", name=re.compile("NUEVO")).click()
+        self._cerrar_modal_con_x()
+
     def filtrar_por_estado(self, estado):
         self.page.locator("div").filter(has_text=re.compile("^Solo activos$")).first.click()
         self.page.get_by_role("option", name=estado, exact=True).click()
+        self.aplicar_filtro()
+
+    def aplicar_filtro(self):
         self.page.get_by_role("button", name=re.compile("Filtrar")).click()
 
     def limpiar_filtro(self):
         self.page.get_by_role("button", name=re.compile("Limpiar")).click()
 
     def editar_categoria(self, nombre):
-        fila = self._fila_de_categoria(nombre)
-        fila.get_by_test_id(re.compile("row-actions-")).click()
-        fila.get_by_test_id(re.compile("btn-edit-")).click()
+        self._abrir_edicion(nombre)
         self.page.get_by_role("button", name=re.compile("Guardar")).click()
         self.page.get_by_role("button", name="Sí").click()
+
+    def cancelar_edicion(self, nombre):
+        self._abrir_edicion(nombre)
+        self.page.get_by_role("button", name=re.compile("Cancelar")).click()
+
+    def cerrar_edicion(self, nombre):
+        self._abrir_edicion(nombre)
+        self._cerrar_modal_con_x()
 
     def cancelar_eliminacion(self, nombre):
         self._abrir_eliminacion(nombre)
@@ -81,6 +98,9 @@ class CategoriaPage:
     def alerta_de_confirmacion(self):
         return self.page.locator(".swal2-container")
 
+    def modal(self):
+        return self.page.get_by_role("dialog")
+
     def _fila_de_categoria(self, nombre):
         return self.page.locator("tr").filter(has_text=nombre)
 
@@ -88,3 +108,11 @@ class CategoriaPage:
         fila = self._fila_de_categoria(nombre)
         fila.get_by_test_id(re.compile("row-actions-")).click()
         fila.get_by_test_id(re.compile("btn-delete-")).click()
+
+    def _abrir_edicion(self, nombre):
+        fila = self._fila_de_categoria(nombre)
+        fila.get_by_test_id(re.compile("row-actions-")).click()
+        fila.get_by_test_id(re.compile("btn-edit-")).click()
+
+    def _cerrar_modal_con_x(self):
+        self.modal().locator(".btn-close").click()

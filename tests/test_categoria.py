@@ -1,11 +1,16 @@
 import re
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 from playwright.sync_api import Page, expect
 
 from pages.categoria_page import CategoriaPage
 from pages.login_page import LoginPage
+
+
+def nombre_categoria_unico():
+    return f"CATEGORIA_QA_{uuid4().hex[:8].upper()}"
 
 
 @pytest.fixture
@@ -33,11 +38,18 @@ def test_importar_categorias(categoria_page: CategoriaPage):
 
 def test_cancelar_importacion(categoria_page: CategoriaPage):
     categoria_page.cancelar_importacion()
+    expect(categoria_page.modal()).to_be_hidden()
+    expect(categoria_page.boton_importar()).to_be_visible()
+
+
+def test_cerrar_importacion_con_x(categoria_page: CategoriaPage):
+    categoria_page.cerrar_importacion()
+    expect(categoria_page.modal()).to_be_hidden()
     expect(categoria_page.boton_importar()).to_be_visible()
 
 
 def test_crear_categoria(categoria_page: CategoriaPage):
-    nombre = "CATEGORIA10002"
+    nombre = nombre_categoria_unico()
 
     categoria_page.crear_categoria(nombre)
 
@@ -46,6 +58,13 @@ def test_crear_categoria(categoria_page: CategoriaPage):
 
 def test_cancelar_creacion(categoria_page: CategoriaPage):
     categoria_page.cancelar_creacion()
+    expect(categoria_page.modal()).to_be_hidden()
+    expect(categoria_page.boton_nuevo()).to_be_visible()
+
+
+def test_cerrar_creacion_con_x(categoria_page: CategoriaPage):
+    categoria_page.cerrar_creacion()
+    expect(categoria_page.modal()).to_be_hidden()
     expect(categoria_page.boton_nuevo()).to_be_visible()
 
 
@@ -59,16 +78,38 @@ def test_editar_categoria(categoria_page: CategoriaPage):
     expect(categoria_page.categoria("CATEGORIA10016")).to_be_visible()
 
 
+def test_cancelar_edicion(categoria_page: CategoriaPage):
+    nombre = nombre_categoria_unico()
+    categoria_page.crear_categoria(nombre)
+    categoria_page.cancelar_edicion(nombre)
+    expect(categoria_page.modal()).to_be_hidden()
+    expect(categoria_page.categoria(nombre)).to_be_visible()
+
+
+def test_cerrar_edicion_con_x(categoria_page: CategoriaPage):
+    nombre = nombre_categoria_unico()
+    categoria_page.crear_categoria(nombre)
+    categoria_page.cerrar_edicion(nombre)
+    expect(categoria_page.modal()).to_be_hidden()
+    expect(categoria_page.categoria(nombre)).to_be_visible()
+
+
 def test_cancelar_eliminacion(categoria_page: CategoriaPage):
-    categoria_page.cancelar_eliminacion("CATEGORIA10017")
-    expect(categoria_page.categoria("CATEGORIA10017")).to_be_visible()
+    nombre = nombre_categoria_unico()
+    categoria_page.crear_categoria(nombre)
+    categoria_page.cancelar_eliminacion(nombre)
+    expect(categoria_page.categoria(nombre)).to_be_visible()
 
 
 def test_eliminar_y_reactivar_categoria(categoria_page: CategoriaPage):
-    categoria_page.eliminar_categoria("CATEGORIA10017")
+    nombre = nombre_categoria_unico()
+    categoria_page.crear_categoria(nombre)
+    categoria_page.eliminar_categoria(nombre)
     expect(categoria_page.alerta_de_confirmacion()).to_be_hidden()
 
     categoria_page.filtrar_por_estado("ANULADO")
-    categoria_page.reactivar_categoria("CATEGORIA10017")
+    categoria_page.aplicar_filtro()
+    expect(categoria_page.categoria(nombre)).to_be_visible()
+    categoria_page.reactivar_categoria(nombre)
     categoria_page.limpiar_filtro()
-    expect(categoria_page.categoria("CATEGORIA10017")).to_be_visible()
+    expect(categoria_page.categoria(nombre)).to_be_visible()
