@@ -11,4 +11,4 @@ class LoginPage:
         self.page.get_by_test_id("login-submit").click()
 
     def mensaje_error(self):
-        return self.page.locator(".alert-danger")
+        return self.page.get_by_role("alert")

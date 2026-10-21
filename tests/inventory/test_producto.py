@@ -9,16 +9,15 @@ from pages.login_page import LoginPage
 from pages.inventory.producto_page import ProductoPage
 
 
-DATOS = Path(__file__).parents[1] / "datos"
-
+DATOS = Path(__file__).resolve().parents[2] / "datos"
 
 def datos_producto_unico():
     identificador = uuid4().hex[:8].upper()
     return {
         "nombre": f"PRODUCTO_QA_{identificador}",
-        "categoria": "LAPTOPS",
+        "categoria": "TECLADOS",
         "descripcion": "Producto creado por pruebas QA",
-        "marca": "APPLE",
+        "marca": "NOKIA",
         "precio_venta": "185",
         "precio_compra": "56",
         "unidad": r"AR.*ARROBA",
@@ -31,7 +30,7 @@ def datos_producto_unico():
 
 def crear_producto_qa(producto_page):
     datos = datos_producto_unico()
-    producto_page.crear(datos, DATOS / "producto.jpg")
+    producto_page.crear(datos, DATOS / "p_korgpa700.jpeg")
     return datos["nombre"]
 
 
